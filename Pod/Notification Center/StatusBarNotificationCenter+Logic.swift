@@ -84,7 +84,14 @@ extension StatusBarNotificationCenter {
                 
                 self.notificationCenterConfiguration = currentNotification.notificationCenterConfiguration
                 self.notificationLabelConfiguration = currentNotification.notificationLabelConfiguration
+                
+                if notificationCenterConfiguration.replacable {
+                    self.notificationSemaphore.signal()
+                }
+                else {
                     self.notificationWindow.resetRootViewController()
+                }
+                
                     switch currentNotification.viewSource {
                     case .customView:
                         self.viewSource = .customView
@@ -97,10 +104,21 @@ extension StatusBarNotificationCenter {
                     case .label:
                         self.viewSource = .label
                         
-                        if let duration = currentNotification.duration {
-                            self.showStatusBarNotificationWithMessage(currentNotification.message, forDuration: duration)
-                        } else {
-                            self.showStatusBarNotificationWithMessage(currentNotification.message, completion: currentNotification.completionHandler)
+                        if notificationCenterConfiguration.replacable, let _ = messageLabel {
+                            updateMessageLabel(messageLabel, with: currentNotification.message)
+                        }
+                        else {
+                            if let duration = currentNotification.duration {
+                                self.showStatusBarNotificationWithMessage(
+                                    currentNotification.message,
+                                    forDuration: duration
+                                )
+                            } else {
+                                self.showStatusBarNotificationWithMessage(
+                                    currentNotification.message,
+                                    completion: currentNotification.completionHandler
+                                )
+                            }
                         }
                     }
               } else {
@@ -292,20 +310,24 @@ extension StatusBarNotificationCenter {
     
     func createMessageLabelWithMessage(_ message: String?) {
         messageLabel = BaseScrollLabel()
-        messageLabel?.text = message
-        messageLabel?.textAlignment = .center
-        messageLabel?.font = messageLabelFont
-        messageLabel?.numberOfLines = messageLabelMultiline ? 0 : 1
-        messageLabel?.textColor = messageLabelTextColor
-        messageLabel?.backgroundColor = messageLabelBackgroundColor
-        messageLabel?.scrollable = messageLabelScrollable
-        messageLabel?.scrollSpeed = messageLabelScrollSpeed
-        messageLabel?.scrollDelay = messageLabelScrollDelay
-        messageLabel?.padding = messageLabelPadding
-        if let messageLabelAttributedText = messageLabelAttributedText {
-            messageLabel?.attributedText = messageLabelAttributedText
-        }
+        updateMessageLabel(messageLabel!, with: message)
         setupNotificationView(messageLabel)
+    }
+    
+    func updateMessageLabel(_ label: BaseScrollLabel, with message: String?) {
+        label.text = message
+        label.textAlignment = .center
+        label.font = messageLabelFont
+        label.numberOfLines = messageLabelMultiline ? 0 : 1
+        label.textColor = messageLabelTextColor
+        label.backgroundColor = messageLabelBackgroundColor
+        label.scrollable = messageLabelScrollable
+        label.scrollSpeed = messageLabelScrollSpeed
+        label.scrollDelay = messageLabelScrollDelay
+        label.padding = messageLabelPadding
+        if let messageLabelAttributedText = messageLabelAttributedText {
+            label.attributedText = messageLabelAttributedText
+        }
     }
     
     func setupNotificationView(_ view: UIView?) {

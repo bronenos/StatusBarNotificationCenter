@@ -38,6 +38,8 @@ public struct NotificationCenterConfiguration {
     public var userInteractionEnabled = true
     /// The window level of the notification window
     public var level: CGFloat = UIWindowLevelNormal
+    
+    public var replacable: Bool = false
   
     /**
     Initializer

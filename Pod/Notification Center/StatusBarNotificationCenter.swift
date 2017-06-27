@@ -10,6 +10,15 @@ import UIKit
 
 /// This is the base class of the notification center object, mainly to define properties
 open class StatusBarNotificationCenter: NSObject {
+    public class var currentMessage: String? {
+        if let label = center.messageLabel {
+            return label.text ?? label.attributedText?.string
+        }
+        else {
+            return nil
+        }
+    }
+    
     //MARK: - Initializers
     
     fileprivate override init() {
