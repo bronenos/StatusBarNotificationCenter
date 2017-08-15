@@ -96,11 +96,17 @@ extension StatusBarNotificationCenter {
                     case .customView:
                         self.viewSource = .customView
                         
-                        if let duration = currentNotification.duration {
-                            self.showStatusBarNotificationWithView(currentNotification.view, forDuration: duration)
-                        } else {
-                            self.showStatusBarNotificationWithView(currentNotification.view, completion: currentNotification.completionHandler)
+                        if notificationCenterConfiguration.replacable, let _ = customView {
+                            self.customView = currentNotification.view
                         }
+                        else {
+                            if let duration = currentNotification.duration {
+                                self.showStatusBarNotificationWithView(currentNotification.view, forDuration: duration)
+                            } else {
+                                self.showStatusBarNotificationWithView(currentNotification.view, completion: currentNotification.completionHandler)
+                            }
+                        }
+                        
                     case .label:
                         self.viewSource = .label
                         
@@ -171,6 +177,7 @@ extension StatusBarNotificationCenter {
         self.notificationWindow.rootViewController?.view.addSubview(view)
         self.notificationWindow.rootViewController?.view.bringSubview(toFront: view)
         self.createSnapshotView()
+        notificationWindow.windowLevel = notificationCenterConfiguration.level
         
         NotificationCenter.default.addObserver(self, selector: #selector(StatusBarNotificationCenter.screenOrientationChanged), name: NSNotification.Name.UIApplicationDidChangeStatusBarOrientation, object: nil)
         
