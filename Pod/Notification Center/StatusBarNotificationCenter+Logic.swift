@@ -140,10 +140,16 @@ extension StatusBarNotificationCenter {
         self.createSnapshotView()
         notificationWindow.windowLevel = notificationCenterConfiguration.level
         
+        let delayInSeconds: Int
         if let messageLabel = self.messageLabel {
+            delayInSeconds = lround(messageLabel.scrollTime)
             self.notificationWindow.rootViewController?.view.addSubview(messageLabel)
             self.notificationWindow.rootViewController?.view.bringSubview(toFront: messageLabel)
         }
+        else {
+            delayInSeconds = 0
+        }
+        
         self.notificationWindow.isHidden = false
         
         NotificationCenter.default.addObserver(self, selector: #selector(StatusBarNotificationCenter.screenOrientationChanged), name: NSNotification.Name.UIApplicationDidChangeStatusBarOrientation, object: nil)
@@ -151,7 +157,6 @@ extension StatusBarNotificationCenter {
         UIView.animate(withDuration: self.animateInLength, animations: { () -> Void in
             self.animateInFrameChange()
             }, completion: { (finished) -> Void in
-                let delayInSeconds = lround(self.messageLabel.scrollTime)
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(delayInSeconds), execute: { () -> Void in
                     if let completion = completion {
                         completion()
